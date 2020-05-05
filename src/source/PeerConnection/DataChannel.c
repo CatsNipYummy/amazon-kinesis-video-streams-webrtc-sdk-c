@@ -9,12 +9,16 @@ STATUS connectLocalDataChannel() {
 
 STATUS createDataChannel(PRtcPeerConnection pPeerConnection, PCHAR pDataChannelName, PRtcDataChannelInit pRtcDataChannelInit, PRtcDataChannel* ppRtcDataChannel)
 {
-    UNUSED_PARAM(pRtcDataChannelInit);
     ENTERS();
+    UNUSED_PARAM(pRtcDataChannelInit);
     STATUS retStatus = STATUS_SUCCESS;
     PKvsPeerConnection pKvsPeerConnection = (PKvsPeerConnection) pPeerConnection;
     UINT32 channelId = 0;
     PKvsDataChannel pKvsDataChannel = NULL;
+
+//    // Initializing Data Channel attributes
+//    pRtcDataChannelInit->ordered = TRUE;
+//    pRtcDataChannelInit->negotiated = FALSE;
 
     CHK(pKvsPeerConnection != NULL && pDataChannelName != NULL && ppRtcDataChannel != NULL, STATUS_NULL_ARG);
 
@@ -24,6 +28,7 @@ STATUS createDataChannel(PRtcPeerConnection pPeerConnection, PCHAR pDataChannelN
     CHK((pKvsDataChannel = (PKvsDataChannel) MEMCALLOC(1, SIZEOF(KvsDataChannel))) != NULL, STATUS_NOT_ENOUGH_MEMORY);
     STRNCPY(pKvsDataChannel->dataChannel.name, pDataChannelName, MAX_DATA_CHANNEL_NAME_LEN);
     pKvsDataChannel->pRtcPeerConnection = (PRtcPeerConnection) pKvsPeerConnection;
+//    pKvsDataChannel->pRtcDataChannelInit = pRtcDataChannelInit;
 
     CHK_STATUS(hashTableGetCount(pKvsPeerConnection->pDataChannels, &channelId));
     CHK_STATUS(hashTablePut(pKvsPeerConnection->pDataChannels, channelId, (UINT64) pKvsDataChannel));

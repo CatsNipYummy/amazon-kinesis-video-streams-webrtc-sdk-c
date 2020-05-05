@@ -61,6 +61,7 @@ STATUS allocateSctp(PKvsPeerConnection pKvsPeerConnection)
     STATUS retStatus = STATUS_SUCCESS;
     SctpSessionCallbacks sctpSessionCallbacks;
     AllocateSctpSortDataChannelsData data;
+    PRtcDataChannelInit pRtcDataChannelInit = NULL;
     UINT32 currentDataChannelId = 0;
     PKvsDataChannel pKvsDataChannel = NULL;
 

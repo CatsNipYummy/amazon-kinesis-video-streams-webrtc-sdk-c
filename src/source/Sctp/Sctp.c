@@ -203,18 +203,57 @@ CleanUp:
 //     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 STATUS sctpSessionWriteDcep(PSctpSession pSctpSession, UINT32 streamId, PCHAR pChannelName, UINT32 pChannelNameLen, PRtcDataChannelInit pRtcDataChannelInit)
 {
-     UNUSED_PARAM(pRtcDataChannelInit);
      ENTERS();
+     UNUSED_PARAM(pRtcDataChannelInit);
      STATUS retStatus = STATUS_SUCCESS;
      struct sctp_sendv_spa spa;
      PBYTE pPacket = NULL;
      UINT32 pPacketSize = SCTP_DCEP_HEADER_LENGTH + pChannelNameLen;
 
-     CHK(pSctpSession != NULL && pChannelName != NULL, STATUS_NULL_ARG);
+     CHK(pSctpSession != NULL && pChannelName != NULL && pRtcDataChannelInit != NULL, STATUS_NULL_ARG);
      CHK((pPacket = (PBYTE) MEMCALLOC(1, pPacketSize)) != NULL, STATUS_NOT_ENOUGH_MEMORY);
 
-     pPacket[0] = DCEP_DATA_CHANNEL_OPEN;
+     /* Setting the fields of DATA_CHANNEL_OPEN message */
+
+     pPacket[0] = DCEP_DATA_CHANNEL_OPEN; // message type
+
+     // Set Channel type based on supplied parameters
      pPacket[1] = DCEP_DATA_CHANNEL_RELIABLE;
+//
+//     // Set channel type and reliability parameters based on input
+//     // SCTP allows fine tuning the channel robustness:
+//     // 1. Ordering: The data packets can be sent out in an ordered/unordered fashion
+//     // 2. Reliability: This determines how the retransmission of packets is handled.
+//     // There are 2 parameters that can be fine tuned to achieve this:
+//     //     a. Number of retransmits
+//     //     b. Packet lifetime
+//     // Default values for the parameters is 0. This falls back to reliable channel
+//     switch(pRtcDataChannelInit->ordered) {
+//     case TRUE:
+//         if(pRtcDataChannelInit->maxRetransmits > 0) {
+//             pPacket[1] = DCEP_DATA_CHANNEL_PARTIAL_RELIABLE_REXMIT;
+//             pPacket[4] = pRtcDataChannelInit->maxRetransmits;
+//         }
+//         else if(pRtcDataChannelInit->maxPacketLifeTime > 0) {
+//             pPacket[1] = DCEP_DATA_CHANNEL_PARTIAL_RELIABLE_TIMED;
+//             pPacket[4] = pRtcDataChannelInit->maxPacketLifeTime;
+//         }
+//         break;
+//     case FALSE:
+//         if(pRtcDataChannelInit->maxRetransmits > 0) {
+//             pPacket[1] = DCEP_DATA_CHANNEL_PARTIAL_RELIABLE_REXMIT_UNORDERED;
+//             pPacket[4] = pRtcDataChannelInit->maxRetransmits;
+//         }
+//         else if(pRtcDataChannelInit->maxPacketLifeTime > 0) {
+//             pPacket[1] = DATA_CHANNEL_PARTIAL_RELIABLE_TIMED_UNORDERED;
+//             pPacket[4] = pRtcDataChannelInit->maxPacketLifeTime;
+//         }
+//         else {
+//             pPacket[1] = DCEP_DATA_CHANNEL_RELIABLE_UNORDERED;
+//         }
+//         break;
+//     }
+
      putUnalignedInt16BigEndian(pPacket + SCTP_DCEP_LABEL_LEN_OFFSET, pChannelNameLen);
      MEMCPY(pPacket + SCTP_DCEP_LABEL_OFFSET, pChannelName, pChannelNameLen);
 

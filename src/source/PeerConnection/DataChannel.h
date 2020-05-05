@@ -15,7 +15,7 @@ typedef struct {
 
     PRtcPeerConnection pRtcPeerConnection;
     UINT32 channelId;
-
+//    PRtcDataChannelInit pRtcDataChannelInit;
     UINT64 onMessageCustomData;
     RtcOnMessage onMessage;
 
